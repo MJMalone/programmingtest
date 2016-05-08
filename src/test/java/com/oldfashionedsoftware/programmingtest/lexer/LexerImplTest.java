@@ -62,7 +62,7 @@ public class LexerImplTest {
     }
 
     @Test
-    public void testAnalyzeWithEmptyNamedEntitiesString() {
+    public void testAnalyzeWithEmptyNamedEntityList() {
         final List<NamedEntity> emptyList = new LinkedList<>();
         final List<Token> expectedResult = new LinkedList<>();
         final String expectedText = "expectedText";
@@ -71,7 +71,7 @@ public class LexerImplTest {
         when(regexBuilder.generateLexerRegex(emptyList)).thenReturn(expectedRegex);
         when(tokenGenerator.generate(expectedText, expectedRegex, emptyList)).thenReturn(expectedResult);
 
-        final List<Token> result = lexer.analyze(expectedText, "");
+        final List<Token> result = lexer.analyze(expectedText, new LinkedList<>());
 
         verify(regexBuilder).generateLexerRegex(emptyList);
         verify(tokenGenerator).generate(expectedText, expectedRegex, emptyList);
@@ -83,9 +83,6 @@ public class LexerImplTest {
 
     @Test
     public void testAnalyzeWithNamedEntitiesString() {
-        final String namedEnityString =
-            "George Washington\n" +
-            "Abraham Lincoln";
         final List<NamedEntity> namedEntityList = Arrays.asList(
             new NamedEntity("George Washington"),
             new NamedEntity("Abraham Lincoln"));
@@ -97,7 +94,7 @@ public class LexerImplTest {
         when(regexBuilder.generateLexerRegex(namedEntityList)).thenReturn(expectedRegex);
         when(tokenGenerator.generate(expectedText, expectedRegex, namedEntityList)).thenReturn(expectedResult);
 
-        final List<Token> result = lexer.analyze(expectedText, namedEnityString);
+        final List<Token> result = lexer.analyze(expectedText, namedEntityList);
 
         verify(regexBuilder).generateLexerRegex(namedEntityList);
         verify(tokenGenerator).generate(expectedText, expectedRegex, namedEntityList);

@@ -27,6 +27,13 @@ public class DocumentTest {
     }
 
     @Test
+    public void testName() {
+        assertEquals("", doc.getName());
+        doc.setName("test");
+        assertEquals("test", doc.getName());
+    }
+
+    @Test
     public void testGetSentences() {
         assertEquals(
             Arrays.asList(sentence1, sentence2, sentence3),

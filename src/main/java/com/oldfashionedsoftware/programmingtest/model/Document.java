@@ -6,9 +6,18 @@ import java.util.stream.Collectors;
 
 public class Document {
     private final List<Sentence> sentences = new LinkedList<>();
+    private String name = "";
 
     public void add(final Sentence sentence) {
         sentences.add(sentence);
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public List<Sentence> getSentences() {

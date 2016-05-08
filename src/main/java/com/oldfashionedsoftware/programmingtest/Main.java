@@ -2,6 +2,9 @@ package com.oldfashionedsoftware.programmingtest;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import com.oldfashionedsoftware.programmingtest.app.TextFileToXmlConverter;
+import com.oldfashionedsoftware.programmingtest.app.ZipFileToXmlConverter;
+
 /*
 
 Remote programming exercise
@@ -34,18 +37,23 @@ public class Main {
 
     public static void main(final String[] args) {
 
-        final String textFileName = args.length > 0 ? args[0] : "nlp_data.txt";
+        final String fileName = args.length > 0 ? args[0] : "nlp_data.zip";
 
         final String namedEntityFileName = args.length > 1 ? args[1] : "NER.txt";
 
         try (final AnnotationConfigApplicationContext ctx =
             new AnnotationConfigApplicationContext(MainConfig.class)) {
 
-            final TextFileToXmlConverter converter = ctx.getBean(TextFileToXmlConverter.class);
-
-            final String xml = converter.convert(textFileName, namedEntityFileName);
-
-            System.out.println(xml);
+            if (fileName.endsWith(".zip")) {
+                final ZipFileToXmlConverter converter = ctx.getBean(ZipFileToXmlConverter.class);
+                final String xml = converter.convert(fileName, namedEntityFileName);
+                System.out.println(xml);
+            }
+            else {
+                final TextFileToXmlConverter converter = ctx.getBean(TextFileToXmlConverter.class);
+                final String xml = converter.convert(fileName, namedEntityFileName);
+                System.out.println(xml);
+            }
 
         } catch (final Exception ex) {
             System.out.println("An exception occurred: " + ex.getMessage());
@@ -53,5 +61,4 @@ public class Main {
         }
 
     }
-
 }
