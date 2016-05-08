@@ -29,10 +29,27 @@ public class TextFileToXmlConverter {
         this.xmlFormatter = xmlFormatter;
     }
 
-    public String convert(final String fileName) throws URISyntaxException, IOException {
-        final String content = reader.getFromClasspath(fileName);
+    public String convert(final String textFileName)
+        throws URISyntaxException, IOException
+    {
+        final String text = reader.getFromClasspath(textFileName);
 
-        final List<Token> tokens = lexer.analyze(content);
+        return convertTextUsingNamedEntityString(text, "");
+    }
+
+    public String convert(final String textFileName, final String namedEntityFileName)
+        throws URISyntaxException, IOException
+    {
+        final String text = reader.getFromClasspath(textFileName);
+        final String namedEntityString = reader.getFromClasspath(namedEntityFileName);
+
+        return convertTextUsingNamedEntityString(text, namedEntityString);
+    }
+
+    private String convertTextUsingNamedEntityString(final String text, final String namedEntityString)
+        throws URISyntaxException, IOException
+    {
+        final List<Token> tokens = lexer.analyze(text, namedEntityString);
 
         final Document doc = parser.parse(tokens);
 

@@ -1,33 +1,37 @@
 package com.oldfashionedsoftware.programmingtest.lexer;
 
-import static com.oldfashionedsoftware.programmingtest.lexer.LexerRegexBuilderTest.EXPECTED_REGEX;
+import static com.oldfashionedsoftware.programmingtest.lexer.LexerRegexBuilderTest.EXPECTED_REGEX_NO_NAMED_ENTITIES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.oldfashionedsoftware.programmingtest.model.NamedEntity;
 import com.oldfashionedsoftware.programmingtest.model.Token;
 import com.oldfashionedsoftware.programmingtest.model.TokenPool;
 import com.oldfashionedsoftware.programmingtest.model.TokenType;
 
 public class RegexTokenGeneratorTest {
 
+    private List<NamedEntity> namedEntities;
     private RegexTokenGenerator gen;
     private TokenPool tokenPool;
 
     @Before
     public void before() {
+        namedEntities = new LinkedList<>();
         tokenPool = new TokenPool();
         gen = new RegexTokenGenerator(tokenPool);
     }
 
     @Test
     public void testEmptyText() {
-        final List<Token> result = gen.generate("", EXPECTED_REGEX);
+        final List<Token> result = gen.generate("", EXPECTED_REGEX_NO_NAMED_ENTITIES, namedEntities);
         assertNotNull(result);
         assertEquals(0, result.size());
     }
@@ -37,7 +41,7 @@ public class RegexTokenGeneratorTest {
         final String testString = "Word";
         final List<Token> expectedResult = Arrays.asList(tokenPool.getToken("Word", TokenType.WORD));
 
-        final List<Token> result = gen.generate(testString, EXPECTED_REGEX);
+        final List<Token> result = gen.generate(testString, EXPECTED_REGEX_NO_NAMED_ENTITIES, namedEntities);
         assertEquals(expectedResult, result);
     }
 
@@ -46,7 +50,7 @@ public class RegexTokenGeneratorTest {
         final String testString = "a";
         final List<Token> expectedResult = Arrays.asList(tokenPool.getToken("a", TokenType.WORD));
 
-        final List<Token> result = gen.generate(testString, EXPECTED_REGEX);
+        final List<Token> result = gen.generate(testString, EXPECTED_REGEX_NO_NAMED_ENTITIES, namedEntities);
         assertEquals(expectedResult, result);
     }
 
@@ -62,7 +66,7 @@ public class RegexTokenGeneratorTest {
             tokenPool.getToken(" ", TokenType.WHITESPACE),
             tokenPool.getToken("d", TokenType.WORD));
 
-        final List<Token> result = gen.generate(testString, EXPECTED_REGEX);
+        final List<Token> result = gen.generate(testString, EXPECTED_REGEX_NO_NAMED_ENTITIES, namedEntities);
         assertEquals(expectedResult, result);
     }
 
@@ -74,7 +78,7 @@ public class RegexTokenGeneratorTest {
             tokenPool.getToken(" ", TokenType.WHITESPACE),
             tokenPool.getToken("word2", TokenType.WORD));
 
-        final List<Token> result = gen.generate(testString, EXPECTED_REGEX);
+        final List<Token> result = gen.generate(testString, EXPECTED_REGEX_NO_NAMED_ENTITIES, namedEntities);
         assertEquals(expectedResult, result);
     }
 
@@ -94,7 +98,7 @@ public class RegexTokenGeneratorTest {
             tokenPool.getToken(" ", TokenType.WHITESPACE),
             tokenPool.getToken("words", TokenType.WORD));
 
-        final List<Token> result = gen.generate(testString, EXPECTED_REGEX);
+        final List<Token> result = gen.generate(testString, EXPECTED_REGEX_NO_NAMED_ENTITIES, namedEntities);
         assertEquals(expectedResult, result);
     }
 
@@ -114,7 +118,7 @@ public class RegexTokenGeneratorTest {
             tokenPool.getToken(" \t\n\r", TokenType.WHITESPACE),
             tokenPool.getToken("six", TokenType.WORD));
 
-        final List<Token> result = gen.generate(testString, EXPECTED_REGEX);
+        final List<Token> result = gen.generate(testString, EXPECTED_REGEX_NO_NAMED_ENTITIES, namedEntities);
         assertEquals(expectedResult, result);
     }
 
@@ -133,7 +137,7 @@ public class RegexTokenGeneratorTest {
             tokenPool.getToken("my", TokenType.WORD),
             tokenPool.getToken("!", TokenType.SENTENCE_TERMINAL));
 
-        final List<Token> result = gen.generate(testString, EXPECTED_REGEX);
+        final List<Token> result = gen.generate(testString, EXPECTED_REGEX_NO_NAMED_ENTITIES, namedEntities);
         assertEquals(expectedResult, result);
     }
 
@@ -166,7 +170,35 @@ public class RegexTokenGeneratorTest {
             tokenPool.getToken("on", TokenType.WORD),
             tokenPool.getToken("?", TokenType.SENTENCE_TERMINAL));
 
-        final List<Token> result = gen.generate(testString, EXPECTED_REGEX);
+        final List<Token> result = gen.generate(testString, EXPECTED_REGEX_NO_NAMED_ENTITIES, namedEntities);
+        assertEquals(expectedResult, result);
+    }
+
+    @Test
+    public void testWithNamedEntities() {
+        namedEntities.add(new NamedEntity("Elvis Presley"));
+        final String testString = "Attention! Elvis Presley has left the building.";
+
+        final List<Token> expectedResult = Arrays.asList(
+            tokenPool.getToken("Attention", TokenType.WORD),
+            tokenPool.getToken("!", TokenType.SENTENCE_TERMINAL),
+            tokenPool.getToken(" ", TokenType.WHITESPACE),
+            tokenPool.getToken("Elvis Presley", TokenType.NAMED_ENTITY),
+            tokenPool.getToken(" ", TokenType.WHITESPACE),
+            tokenPool.getToken("has", TokenType.WORD),
+            tokenPool.getToken(" ", TokenType.WHITESPACE),
+            tokenPool.getToken("left", TokenType.WORD),
+            tokenPool.getToken(" ", TokenType.WHITESPACE),
+            tokenPool.getToken("the", TokenType.WORD),
+            tokenPool.getToken(" ", TokenType.WHITESPACE),
+            tokenPool.getToken("building", TokenType.WORD),
+            tokenPool.getToken(".", TokenType.SENTENCE_TERMINAL));
+
+        final List<Token> result = gen.generate(
+            testString,
+            "(?<NE>George\\s+Washington|Elvis\\s+Presley|Abraham\\s+Lincoln)|" +
+            EXPECTED_REGEX_NO_NAMED_ENTITIES,
+            namedEntities);
         assertEquals(expectedResult, result);
     }
 
@@ -182,6 +214,6 @@ public class RegexTokenGeneratorTest {
         // This string includes a character '^' that is not covered by named capture groups.
         final String testString = "a ^";
 
-        gen.generate(testString, INCOMPLETE_REGEX);
+        gen.generate(testString, INCOMPLETE_REGEX, namedEntities);
     }
 }

@@ -43,7 +43,7 @@ public class TextFileToXmlConverterTest {
         // From file name to file contents
         when(reader.getFromClasspath("test_file_name")).thenReturn("raw file data");
         // From file contents to a list of Tokens
-        when(lexer.analyze("raw file data")).thenReturn(tokenList);
+        when(lexer.analyze("raw file data", "")).thenReturn(tokenList);
         // From list of Tokens to a Document
         when(parser.parse(tokenList)).thenReturn(doc);
         // From a Document to an XML string
@@ -54,7 +54,38 @@ public class TextFileToXmlConverterTest {
         assertEquals("expected result", result);
 
         verify(reader).getFromClasspath("test_file_name");
-        verify(lexer).analyze("raw file data");
+        verify(lexer).analyze("raw file data", "");
+        verify(parser).parse(tokenList);
+        verify(xmlFormatter).toXml(doc);
+
+        verifyNoMoreInteractions(lexer, parser, reader, xmlFormatter);
+    }
+
+    @Test
+    public void testConvertWithNamedEntities() throws Exception {
+        final List<Token> tokenList = Arrays.asList(
+            new TokenPool().getToken("word", TokenType.WORD));
+        final Document doc = new Document();
+
+        // This is the pipeline that TextFileToXmlConverter defines:
+        // From file name to file contents
+        when(reader.getFromClasspath("test_file_name")).thenReturn("raw file data");
+        // From file name to file contents
+        when(reader.getFromClasspath("named_entities_file_name")).thenReturn("named entity data");
+        // From file contents to a list of Tokens
+        when(lexer.analyze("raw file data", "named entity data")).thenReturn(tokenList);
+        // From list of Tokens to a Document
+        when(parser.parse(tokenList)).thenReturn(doc);
+        // From a Document to an XML string
+        when(xmlFormatter.toXml(doc)).thenReturn("expected result");
+
+        final String result = converter.convert("test_file_name", "named_entities_file_name");
+
+        assertEquals("expected result", result);
+
+        verify(reader).getFromClasspath("test_file_name");
+        verify(reader).getFromClasspath("named_entities_file_name");
+        verify(lexer).analyze("raw file data", "named entity data");
         verify(parser).parse(tokenList);
         verify(xmlFormatter).toXml(doc);
 

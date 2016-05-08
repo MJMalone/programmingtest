@@ -34,14 +34,16 @@ public class Main {
 
     public static void main(final String[] args) {
 
-        final String fileName = args.length > 0 ? args[0] : "nlp_data.txt";
+        final String textFileName = args.length > 0 ? args[0] : "nlp_data.txt";
+
+        final String namedEntityFileName = args.length > 1 ? args[1] : "NER.txt";
 
         try (final AnnotationConfigApplicationContext ctx =
             new AnnotationConfigApplicationContext(MainConfig.class)) {
 
             final TextFileToXmlConverter converter = ctx.getBean(TextFileToXmlConverter.class);
 
-            final String xml = converter.convert(fileName);
+            final String xml = converter.convert(textFileName, namedEntityFileName);
 
             System.out.println(xml);
 

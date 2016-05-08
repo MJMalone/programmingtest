@@ -6,6 +6,9 @@ public enum TokenType {
 
     // NOTE that the order of these enumerated values is significant and should not be changed.
 
+    // Named entities
+    NAMED_ENTITY(           "NE", null), // The regex for named entities is calculated elsewhere
+
     // Any whitespace.
     WHITESPACE(             "WS", "\\s+"),
 
